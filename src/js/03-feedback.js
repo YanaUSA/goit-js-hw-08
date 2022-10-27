@@ -1,8 +1,7 @@
 import throttle from "lodash.throttle";
 
-const LOCALSTORAGE_KEY = "feedback-form-state";
-
 const formData = {};
+const sendDataAfterSubmit = {};
 
 const refs = {
     form: document.querySelector(".feedback-form"),
@@ -11,37 +10,45 @@ const refs = {
 };
 
 refs.form.addEventListener("submit", onFormSubmit);
-refs.textarea.addEventListener("input", throttle(onTextareaInput, 500));
-
-refs.form.addEventListener("input", evt => {
-
-    formData[evt.target.name] = evt.target.value;
-    console.log(formData);
-});
-
-
+refs.form.addEventListener("input", throttle(onFormInputsEntry, 500));
 
 function onFormSubmit(evt) {
     evt.preventDefault();
+
+    if (refs.input.value === "" || refs.textarea.value === "") {
+        return alert("Please fill all form fields before submit!")
+    }
+
+    // if (!refs.input.value || !refs.textarea.value) {
+    //     return alert("Please fill all form fields before submit!")
+    // }
+
+    const onSubmitData = new FormData(evt.currentTarget);  
+
+    onSubmitData.forEach((value, name) => {
+        sendDataAfterSubmit[name] = value;
+    });
+    
+    console.log(sendDataAfterSubmit)  
+    
     evt.currentTarget.reset();
-    localStorage.removeItem("LOCALSTORAGE_KEY")
+    localStorage.removeItem("feedback-form-state")
 };
 
-function onTextareaInput(evt) {
-    const message = evt.target.value;
-    localStorage.setItem("LOCALSTORAGE_KEY", message)
-
-    // console.log(message);
+function onFormInputsEntry(evt) {
+    formData[evt.target.name] = evt.target.value;
+    localStorage.setItem("feedback-form-state", JSON.stringify(formData))
 };
 
-savingTextareaNoteBeforeSubmit();
+savingInputsDataBeforeSubmit();
 
-function savingTextareaNoteBeforeSubmit() {
-    const savedMessage = localStorage.getItem("LOCALSTORAGE_KEY");
-
-    if (savedMessage) {    
-        refs.textarea.value = savedMessage;
+function savingInputsDataBeforeSubmit() {
+    let savedFormData = localStorage.getItem("feedback-form-state");
+    
+    if (savedFormData) {   
+        const savedDataParsed = JSON.parse(savedFormData);
+        Object.entries(savedDataParsed).forEach(([name, value]) => {
+            refs.form.elements[name].value = value;
+        });
     };  
 };
-
-
