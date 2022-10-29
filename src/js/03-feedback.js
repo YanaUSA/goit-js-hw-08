@@ -1,6 +1,6 @@
 import throttle from "lodash.throttle";
 
-const formData = {};
+let formData;
 const sendDataAfterSubmit = {};
 
 const refs = {
@@ -36,8 +36,12 @@ function onFormSubmit(evt) {
 };
 
 function onFormInputsEntry(evt) {
+    formData = localStorage.getItem("feedback-form-state");
+    formData = formData ? JSON.parse(formData) : {};
+
     formData[evt.target.name] = evt.target.value;
-    localStorage.setItem("feedback-form-state", JSON.stringify(formData))
+    localStorage.setItem("feedback-form-state", JSON.stringify(formData)) 
+    console.log(formData)
 };
 
 savingInputsDataBeforeSubmit();
